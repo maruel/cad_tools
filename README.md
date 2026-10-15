@@ -33,9 +33,18 @@ describes inputs.
 Signature assets belong in project inputs. Stock is supplied explicitly through
 `cad_tools.stock.read_stock(path)` and passed to `resolve_job(job, stock)` or
 `build_job(..., stock=stock)`. CLI `build-job` requires `--stock PATH`. Schemas and
-validation live in the corresponding source definitions. Use `cad_tools.assembly`
-for inspection assemblies and `cad_tools.bambu_job` for printable jobs. See
+validation live in the corresponding source definitions. Use `step.py`
+for STEP visualization assemblies and `cad_tools.bambu_job` for 3MF print jobs. See
 [AGENTS.md](AGENTS.md) for recipe, workspace, and publication guidance.
+
+`uv run --locked --project PATH_TO_CAD_TOOLS PATH_TO_CAD_TOOLS/step.py VIEWS.json --output OUTPUT_DIR`
+exports named, colored STEP visualization assemblies from closed STL meshes.
+Run it from the consuming project's root to keep scratch files in its `build/`.
+The manifest maps `.step` filenames to part records with `name`, `path`,
+`color` (`#RRGGBB`) and optional `translation` (`[x,y,z]` in millimeters).
+Paths are relative to the manifest. STEP geometry retains the mesh's planar
+facets as solids without fitting curves. The exporter reopens every file and checks
+part names, colors, solid validity, bounds and volume before accepting it.
 
 Select an explicit tooling commit to update a project:
 

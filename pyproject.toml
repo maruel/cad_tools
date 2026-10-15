@@ -2,7 +2,11 @@
 name = "cad-tools"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["pillow>=12.3,<13", "sca2d==0.4.0"]
+dependencies = [
+    "cadquery-ocp==7.9.3.1.1",
+    "pillow==12.3.0",
+    "sca2d==0.4.0",
+]
 
 [dependency-groups]
 dev = ["ruff==0.16.10"]
@@ -21,7 +25,6 @@ select = ["E", "F", "W", "I", "B", "UP"]
 [tool.ruff.lint.isort]
 known-first-party = ["cad_tools"]
 
-# Entrypoints defer bytecode writes until the owner configures its workspace.
 [tool.ruff.lint.per-file-ignores]
 "bambu_studio.py" = ["E402"]
 "blender.py" = ["E402"]
