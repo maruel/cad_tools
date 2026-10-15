@@ -1,0 +1,35 @@
+[project]
+name = "cad-tools"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["pillow>=12.3,<13", "sca2d==0.4.0"]
+
+[dependency-groups]
+dev = ["ruff==0.16.10"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+src = ["."]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["cad_tools"]
+
+# Entrypoints defer bytecode writes until the owner configures its workspace.
+[tool.ruff.lint.per-file-ignores]
+"bambu_studio.py" = ["E402"]
+"blender.py" = ["E402"]
+"mesh.py" = ["E402"]
+"openscad.py" = ["E402"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
