@@ -38,13 +38,18 @@ for STEP visualization assemblies and `cad_tools.bambu_job` for 3MF print jobs. 
 [AGENTS.md](AGENTS.md) for recipe, workspace, and publication guidance.
 
 `uv run --locked --project PATH_TO_CAD_TOOLS PATH_TO_CAD_TOOLS/step.py VIEWS.json --output OUTPUT_DIR`
-exports named, colored STEP visualization assemblies from closed STL meshes.
+exports named, colored compressed STEP visualization assemblies from closed STL meshes.
 Run it from the consuming project's root to keep scratch files in its `build/`.
-The manifest maps `.step` filenames to part records with `name`, `path`,
+The manifest maps `.stpz` filenames to part records with `name`, `path`,
 `color` (`#RRGGBB`) and optional `translation` (`[x,y,z]` in millimeters).
 Paths are relative to the manifest. STEP geometry retains the mesh's planar
-facets as solids without fitting curves. The exporter reopens every file and checks
-part names, colors, solid validity, bounds and volume before accepting it.
+facets as solids without fitting curves. Each deterministic ZIP contains one
+same-stem `.stp` file. The exporter reopens the saved archive, checks its structure
+and CRC, then imports the decompressed STEP to check part names, colors, solid
+validity, bounds and volume before accepting it. Only `.stpz` files are delivered.
+`cad_tools.step_archive.pack_step` and `unpack_step` provide the shared archive
+boundary for native analytic STEP recipes; those recipes validate their saved
+archive payload before publication.
 
 Select an explicit tooling commit to update a project:
 

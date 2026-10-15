@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Export and validate named, colored STEP views from assembly-coordinate STL.
+"""Export and validate named, colored compressed STEP views from assembly-coordinate STL.
 
-The JSON input maps local .step filenames to lists of AssemblyPart records:
+The JSON input maps local .stpz filenames to lists of AssemblyPart records:
 name, path, color (#RRGGBB), and optional translation ([x,y,z] in millimeters).
-Mesh paths are relative to the manifest. Geometry remains faceted.
+Mesh paths are relative to the manifest. Geometry remains faceted. Each ZIP
+contains one same-stem .stp file; the saved archive is reopened for validation.
 """
 
 import argparse

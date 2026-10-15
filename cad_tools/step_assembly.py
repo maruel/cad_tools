@@ -9,6 +9,7 @@ the pinned bindings, so serialization uses the polygon representation directly.
 
 import math
 import struct
+import tempfile
 from collections import defaultdict
 from collections.abc import Sequence
 from pathlib import Path
@@ -32,6 +33,7 @@ from OCP.TopoDS import TopoDS_Shape
 from OCP.XCAFDoc import XCAFDoc_ColorSurf, XCAFDoc_DocumentTool, XCAFDoc_ShapeTool
 
 from cad_tools.assembly import AssemblyPart
+from cad_tools.step_archive import pack_step, unpack_step
 from cad_tools.stl import TRIANGLE, MeshInfo, validate_stl
 from cad_tools.workspace import workspace_root
 
@@ -239,9 +241,9 @@ def validate_view(path: Path, parts: Sequence[AssemblyPart], meshes: dict[Path, 
 
 
 def write_views(directory: Path, views: dict[str, Sequence[AssemblyPart]]) -> None:
-    """Publish each view only after its saved STEP passes independent import."""
-    if not views or any(Path(name).name != name or Path(name).suffix != ".step" for name in views):
-        raise ValueError("STEP view names must be local .step filenames")
+    """Publish STPZ only after reopening its archive and importing the saved STEP."""
+    if not views or any(Path(name).name != name or Path(name).suffix != ".stpz" for name in views):
+        raise ValueError("STEP view names must be local .stpz filenames")
     for parts in views.values():
         if not parts or len({part.name for part in parts}) != len(parts):
             raise ValueError("Each STEP view requires uniquely named parts")
@@ -253,8 +255,10 @@ def write_views(directory: Path, views: dict[str, Sequence[AssemblyPart]]) -> No
     staging = workspace_root() / "step-assembly"
     staging.mkdir(parents=True, exist_ok=True)
     for filename, parts in views.items():
-        temporary = staging / filename
-        try:
+        with tempfile.TemporaryDirectory(dir=staging) as scratch:
+            archive = Path(scratch) / filename
+            temporary = archive.with_suffix(".stp")
+            reopened = Path(scratch) / f"{archive.stem}.reopened.stp"
             with temporary.open("w", encoding="ascii") as stream:
                 stream.write(
                     "ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('Faceted assembly'),'2;1');\n"
@@ -263,8 +267,8 @@ def write_views(directory: Path, views: dict[str, Sequence[AssemblyPart]]) -> No
                 )
                 FacetedStep(stream).view(Path(filename).stem, parts)
                 stream.write("ENDSEC;\nEND-ISO-10303-21;\n")
-            print(f"Validating saved STEP: {filename} ({temporary.stat().st_size / 1024**2:.1f} MiB)", flush=True)
-            validate_view(temporary, parts, meshes)
-            temporary.replace(directory / filename)
-        finally:
-            temporary.unlink(missing_ok=True)
+            pack_step(temporary, archive)
+            unpack_step(archive, reopened)
+            print(f"Validating saved STPZ: {filename} ({archive.stat().st_size / 1024**2:.1f} MiB)", flush=True)
+            validate_view(reopened, parts, meshes)
+            archive.replace(directory / filename)
