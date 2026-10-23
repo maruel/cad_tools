@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "cadquery-ocp==7.9.3.1.1",
-    "pillow==12.3.0",
+    "pillow==13.0.0",
     "sca2d==0.4.0",
 ]
 
